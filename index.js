@@ -47,7 +47,7 @@ function showAdditionalInfo() {
 }
 
 // Di bagian atas file setelah imports
-const LOGIN_SESSION_FILE = './session/.session_login';
+const LOGIN_SESSION_FILE = './lib/database/.session_login';
 
 // Fungsi untuk mengecek session login
 function checkLoginSession() {
