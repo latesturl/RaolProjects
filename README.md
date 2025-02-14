@@ -9,7 +9,13 @@
 - **RECODER BASE: Raol Mukarrozi**
 - **TYPE: CASE X PLUGINS (CJS)**
 - **NO ENC 100%**
-
+```csharp
+-------------------------
+LOGIN SCRIPT RaolProjects
+USERNAME: admin
+PASSWORD: admin#123
+-------------------------
+```
 ## LIST FITURE
 - **SOON**
 
