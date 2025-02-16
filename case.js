@@ -358,8 +358,25 @@ case 'allmenu': {
         uptime: runtime(process.uptime())
     };
 
-    // Daftar Menu
-    const ownerMenu = `
+    // Daftar Menu (Urutan: Download > Search > Tools > Fun > Owner > Utility)
+    const funMenu = `
+┏━━°⌜ *DOWNLOAD MENU* ⌟°━━┓
+┃  ⭒ (Fitur dalam pengembangan)
+┗━━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━°⌜ *SEARCH MENU* ⌟°━━┓
+┃  ⭒ (Fitur dalam pengembangan)
+┗━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━°⌜ *TOOLS MENU* ⌟°━━┓
+┃  ⭒ (Fitur dalam pengembangan)
+┗━━━━━━━━━━━━━━━━━━━━━━┛
+
+┏━━°⌜ *FUN MENU* ⌟°━━┓
+┃  ⭒ ${prefix}brat
+┃  ⭒ ${prefix}bratvid
+┗━━━━━━━━━━━━━━━━━━━━┛
+
 ┏━━°⌜ *OWNER MENU* ⌟°━━┓
 ┃  ⭒ ${prefix}addgroup
 ┃  ⭒ ${prefix}removegroup
@@ -371,6 +388,7 @@ case 'allmenu': {
 ┃  ⭒ ${prefix}trash
 ┃  ⭒ ${prefix}addcase
 ┃  ⭒ ${prefix}addconst
+┃  ⭒ ${prefix}get
 ┃  ⭒ ${prefix}getfunc
 ┃  ⭒ ${prefix}upchv1
 ┃  ⭒ ${prefix}upchv2
@@ -383,7 +401,6 @@ case 'allmenu': {
 ┗━━━━━━━━━━━━━━━━━━`.trim()
 
     try {
-        // Kirim gambar tanpa contextInfo
         await Raol404.sendMessage(m.chat, {
             image: { url: 'https://files.catbox.moe/oof6ot.jpg' },
             caption: `
@@ -393,14 +410,13 @@ Halo *${pushname}*, berikut daftar lengkap fitur bot!
 ▢ *Mode* : ${botInfo.status}
 ▢ *Version* : ${botInfo.version}
 
-${ownerMenu}
+${funMenu}
 
 📌 *Note*: 
 - Cooldown berlaku untuk beberapa fitur`.trim(),
             footer: `LatestURL | RaolProjects`
         }, { quoted: m })
 
-        // Kirim audio tambahan (opsional)
         await Raol404.sendMessage(m.chat, {
             audio: fs.readFileSync("./temporary/media/audio.mp3"),
             mimetype: 'audio/mp4',
@@ -1055,6 +1071,117 @@ case "swgc": {
         // Balasan gagal
         reply("❌ Gagal mengirim status. Silakan coba lagi.");
         console.error("Error sending status:", error);
+    }
+}
+break;
+case 'brat': {
+    if (!text) return reply('Please provide the text as well');
+    const apiUrl = `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text)}`;
+    await Raol404.sendImageAsSticker(
+        m.chat, 
+        apiUrl, 
+        m, 
+        { 
+            packname: global.packname, 
+            author: global.author 
+        }
+    );
+    break;
+}
+case 'bratvid': {
+    const { execSync } = require('child_process');
+    const tempDir = path.join(process.cwd(), 'temporary/');
+    const framePaths = [];
+
+    if (!text) return reply(`Example: ${prefix + command} hello I am whyuxD`);
+    if (text.length > 40) return reply(`Character limit exceeded, max 40 characters!`);
+
+    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
+
+    try {
+        const words = text.split(" ");
+        for (let i = 0; i < words.length; i++) {
+            const currentText = words.slice(0, i + 1).join(" ");
+            const res = await axios.get(
+                `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(currentText)}`,
+                { responseType: "arraybuffer" }
+            ).catch((e) => e.response);
+
+            const framePath = path.join(tempDir, `frame${i}.mp4`);
+            fs.writeFileSync(framePath, res.data);
+            framePaths.push(framePath);
+        }
+
+        const fileListPath = path.join(tempDir, "filelist.txt");
+        let fileListContent = framePaths.map((frame, index) => 
+            `file '${frame}'\nduration 0.7\n`
+        ).join("");
+
+        fileListContent += `file '${framePaths[framePaths.length - 1]}'\nduration 2\n`;
+        fs.writeFileSync(fileListPath, fileListContent);
+
+        const outputVideoPath = path.join(tempDir, "output.mp4");
+        execSync(
+            `ffmpeg -y -f concat -safe 0 -i ${fileListPath} -vf "fps=30" -c:v libx264 -preset ultrafast -pix_fmt yuv420p ${outputVideoPath}`
+        );
+
+        await Raol404.sendImageAsSticker(m.chat, outputVideoPath, m, {
+            packname: global.packname,
+            author: global.author
+        });
+
+        framePaths.forEach((frame) => {
+            if (fs.existsSync(frame)) fs.unlinkSync(frame);
+        });
+        if (fs.existsSync(fileListPath)) fs.unlinkSync(fileListPath);
+        if (fs.existsSync(outputVideoPath)) fs.unlinkSync(outputVideoPath);
+
+    } catch (error) {
+        console.error('Error in bratvid case:', error);
+        reply('An error occurred while processing the video.');
+    }
+
+    break;
+}
+case 'get': {
+    if (!isOwner) return reply('*Owner only*');
+    if (!text) return reply(`Please start the *URL* with http:// or https://`);
+    try {
+        const gt = await axios.get(text, {
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Referer": "https://www.google.com/",
+                "Referrer-Policy": "strict-origin-when-cross-origin",
+                "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+            },
+            responseType: 'arraybuffer'
+        });
+        const contentType = gt.headers['content-type'];
+        console.log(`Content-Type: ${contentType}`);
+        if (/json/i.test(contentType)) {
+            const jsonData = JSON.parse(Buffer.from(gt.data, 'binary').toString('utf8'));
+            return reply(JSON.stringify(jsonData, null, 2));
+        } else if (/text/i.test(contentType)) {
+            const textData = Buffer.from(gt.data, 'binary').toString('utf8');
+            return reply(textData);
+        } else if (text.includes('webp')) {
+            return Raol404.sendMessage(m.chat, { sticker: { url: text }}, { quoted: m });
+        } else if (/image/i.test(contentType)) {
+            return Raol404.sendMessage(m.chat, { image: { url: text }}, { quoted: m });
+        } else if (/video/i.test(contentType)) {
+            return Raol404.sendMessage(m.chat, { video: { url: text }}, { quoted: m });
+        } else if (/audio/i.test(contentType) || text.includes(".mp3")) {
+            return Raol404.sendMessage(m.chat, { audio: { url: text }}, { quoted: m });
+        } else if (/application\/zip/i.test(contentType) || /application\/x-zip-compressed/i.test(contentType)) {
+            return Raol404.sendMessage(m.chat, { document: { url: text }}, { quoted: m });
+        } else if (/application\/pdf/i.test(contentType)) {
+            return Raol404.sendMessage(m.chat, { document: { url: text }}, { quoted: m });
+        } else {
+            return reply(`MIME : ${contentType}\n\n${gt.data}`);
+        }
+    } catch (error) {
+        console.error(`Error: ${error}`);
+        return reply(`An error occurred while accessing the URL: ${error.message}`);
     }
 }
 break;
