@@ -181,69 +181,28 @@ const Raol = (text, style = 1) => {
 };
 //Reply
 const reply = async (teks) => {
-    try {
-        // Validasi input teks
-        if (!teks || typeof teks !== 'string') {
-            throw new Error('Invalid text input. Text must be a non-empty string.');
-        }
-
-        // Konfigurasi pesan
-        const Thezy = {
-            contextInfo: {
-                forwardingScore: 20,
-                isForwarded: true,
-                forwardedNewsletterMessageInfo: {
-                    newsletterName: `LatestURL | RaolProjects`,
-                    newsletterJid: `120363378800202820@newsletter`,
-                },
-                externalAdReply: {
-                    showAdAttribution: true,
-                    title: `LatestURL | RaolProjects`,
-                    body: `${ucapanWaktu}`,
-                    thumbnailUrl: `https://files.catbox.moe/rrv9rt.jpg`,
-                    thumbnail: '',
-                    sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46',
-                },
-            },
-            text: teks,
-        };
-
-        // Kirim pesan
-        const sentMessage = await Raol404.sendMessage(m.chat, Thezy, {
-            quoted: ftroli,
-            ephemeralExpiration: 1,
-        });
-
-        // Log pesan yang berhasil dikirim
-        console.log(chalk.green(`[REPLY SUCCESS] Message sent to ${m.chat}`));
-        return sentMessage;
-
-    } catch (error) {
-        // Log error
-        console.error(chalk.red(`[REPLY ERROR]`), error);
-
-        // Kirim pesan error ke pengguna
-        try {
-            await Raol404.sendMessage(m.chat, {
-                text: `❌ Gagal mengirim pesan. Error: ${error.message}`,
-            });
-        } catch (fallbackError) {
-            console.error(chalk.red(`[FALLBACK ERROR]`), fallbackError);
-        }
-
-        // Kirim error ke admin
-        const errId = `${global.ownNumb}@s.whatsapp.net`;
-        try {
-            await Raol404.sendMessage(errId, {
-                text: `⚠️ [REPLY ERROR] ⚠️\n\n` +
-                      `• Chat: ${m.chat}\n` +
-                      `• Sender: ${m.sender}\n` +
-                      `• Error: ${error.stack || error.message}`,
-            });
-        } catch (adminError) {
-            console.error(chalk.red(`[ADMIN ERROR]`), adminError);
-        }
-    }
+const Thezy = {
+contextInfo: {
+forwardingScore: 20,
+isForwarded: true,
+forwardedNewsletterMessageInfo: {
+newsletterName: `LatestURL | RaolProjects`,
+newsletterJid: `120363378800202820@newsletter`,
+},
+externalAdReply: {
+showAdAttribution: true,
+title: `LatestURL | RaolProjects`, 
+body: `${ucapanWaktu}`, 
+thumbnailUrl: `https://files.catbox.moe/rrv9rt.jpg`, 
+thumbnail: '',
+sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46', 
+},
+},
+text: teks, 
+};
+return Raol404.sendMessage(m.chat, Thezy, {
+quoted: ftroli, ephemeralExpiration: 1,
+});
 };
 
 const pluginsLoader = async (directory) => {
@@ -413,7 +372,6 @@ case 'allmenu': {
 ┃  ⭒ ${prefix}addcase
 ┃  ⭒ ${prefix}addconst
 ┃  ⭒ ${prefix}getfunc
-┃  ⭒ ${prefix}idch
 ┃  ⭒ ${prefix}upchv1
 ┃  ⭒ ${prefix}upchv2
 ┃  ⭒ ${prefix}swgc
@@ -744,35 +702,36 @@ reply('succes')
 }
 break
 case 'idch': {
-if (!text) return reply(("where is the channel link?"))
-if (!text.includes("https://whatsapp.com/channel/")) return reply("Invalid link")
-let result = text.split('https://whatsapp.com/channel/')[1]
-let res = await Raol404.newsletterMetadata("invite", result)
-let teks = `* *ID : ${res.id}*
-* *Name :* ${res.name}
-* *Total Followers :* ${res.subscribers}
-* *Status :* ${res.state}
-* *Verified :* ${res.verification == "VERIFIED" ? "verified" : "No"}`
-let msg = generateWAMessageFromContent(m.chat, {
-viewOnceMessage: {
-message: { "messageContextInfo": { "deviceListMetadata": {}, "deviceListMetadataVersion": 2 },
-interactiveMessage: {
-body: {
-text: teks }, 
-footer: {
-text: "LatestURL | RaolProjects" }, //input watermark footer
-  nativeFlowMessage: {
-  buttons: [
-             {
-        "name": "cta_copy",
-        "buttonParamsJson": `{"display_text": "copy ID","copy_code": "${res.id}"}`
-           },
-     ], },},
-    }, }, },{ quoted : m });
-await Raol404.relayMessage( msg.key.remoteJid,msg.message,{ messageId: msg.key.id }
-);
+  if (!text) return reply("Where is the channel link?");
+  if (!text.includes("https://whatsapp.com/channel/")) return reply("Invalid link");
+  
+  let result = text.split('https://whatsapp.com/channel/')[1];
+  let res = await Raol404.newsletterMetadata("invite", result);
+  
+  let teks = `*ID : ${res.id}*\n*Name :* ${res.name}\n*Total Followers :* ${res.subscribers}\n*Status :* ${res.state}\n*Verified :* ${res.verification == "VERIFIED" ? "Yes" : "No"}`;
+
+  let msg = generateWAMessageFromContent(m.chat, {
+    viewOnceMessage: {
+      message: {
+        "messageContextInfo": {
+          "deviceListMetadata": {},
+          "deviceListMetadataVersion": 2
+        },
+        extendedTextMessage: {
+          text: teks,
+          contextInfo: {
+            mentionedJid: [],
+            forwardingScore: 0,
+            isForwarded: true
+          }
+        }
+      }
+    }
+  }, { quoted: ftroli });
+
+  await Raol404.relayMessage(msg.key.remoteJid, msg.message, { messageId: msg.key.id });
 }
-break
+break;
 case 'upchv1': {
 if (!isCreator) return reply(mess.owner)
         		try {
