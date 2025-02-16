@@ -403,7 +403,7 @@ ${ownerMenu}
         footer: `LatestURL | RaolProjects`,
         contextInfo: {
             mentionedJid: [m.sender],
-            forwardingScore: 20,
+            forwardingScore: 0,
             isForwarded: true,
             externalAdReply: {
                 showAdAttribution: true,
