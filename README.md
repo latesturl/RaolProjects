@@ -1,5 +1,5 @@
 <h1 align="center">
-	<img width="250" src="https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/Yuichiro.jpg" alt="Yuichiro Hyakuya"><p>
+	<img width="512" src="https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menu.jpg" alt="RaolProjects"><p>
 </h1>
 
 <br>
@@ -31,22 +31,42 @@ PASSWORD: admin#123
 -------------------------
 ```
 ## LIST FITURE
-- **SOON**
+- **DOWNLOAD MENU ( SOON )**
+- **SEARCH MENU ( SOON )**
+- **TOOLS MENU ( SOON )**
+- **FUN MENU [✓]**
+- **OWNER MENU [✓]**
 
 ## Contact Me:
 - **Gmail: latesturltech@gmail.com**
 - **Website: SOON**
 - **WhatsApp: SOON**
 ---
-## **All Contributors**  
+## **All Contributors**
 <a href="https://github.com/Alifatahfauzi"><img src="https://avatars.githubusercontent.com/u/118640580?v=4?size=100" width="100" height="100"></a> | <a href="https://github.com/latesturl"><img src="https://avatars.githubusercontent.com/u/198647531?v=4?size=100" width="100" height="100"></a>
 ---|---
 [Fauzialifatah](https://github.com/Alifatahfauzi/) | [Raol Mukarrozi](https://github.com/latesturl/)  
 Owner | Recode
 
-## **All DONATE**  
+## **All DONATE**
 ---
-
-## Stargazers over time
+### Installation
+1. Clone the repository to your local machine:
+   ```bash
+   git clone https://github.com/latesturl/RaolProjects.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd RaolProjects
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+4. Modify the `config.js` file to configure your bot.
+5. Start the server:
+   ```bash
+   npm start
+   ```
 [![Stargazers over time](https://starchart.cc/latesturl/RaolProjects.svg?variant=adaptive)](https://starchart.cc/latesturl/RaolProjects)
 **© 2025 RaolProjects. All rights reserved**
