@@ -28,6 +28,34 @@ const _cmd = JSON.parse(fs.readFileSync('./lib/database/command.json'));
 const _cmdUser = JSON.parse(fs.readFileSync('./lib/database/commandUser.json'));
 const { addCountCmd, getPosiCmdUser, addCountCmdUser } = require('./temporary/helpers/command')
 
+const downloadFile = async (url, path) => {
+  const response = await axios.get(url, { responseType: 'stream' });
+  const writer = fs.createWriteStream(path);
+  response.data.pipe(writer);
+  return new Promise((resolve, reject) => {
+    writer.on('finish', resolve);
+    writer.on('error', reject);
+  });
+};
+
+const getFileTimestamp = async (filePath) => {
+  try {
+    const stats = await fs.promises.stat(filePath);
+    return stats.mtimeMs;
+  } catch (error) {
+    return null;
+  }
+};
+
+const isValidUrl = (url) => {
+  try {
+    new URL(url);
+    return url.endsWith('.js');
+  } catch (error) {
+    return false;
+  }
+};
+
 //Base
 module.exports = Raol404 = async (Raol404, m, chatUpdate, store) => {
 try {
@@ -320,6 +348,82 @@ case "menu": case "help": {
     }, { quoted: ftroli });
 }
 break;
+case 'allmenu': {
+    Raol404.sendMessage(m.chat, { react: { text: `${randomemoji}`, key: m.key }});
+    addCountCmd('#allmenu', m.sender, _cmd);
+
+    const botInfo = {
+        status: Raol404.public ? "Public Mode" : "Self Mode",
+        version: "3.0.5",
+        uptime: runtime(process.uptime())
+    };
+
+    // Daftar Menu
+    const ownerMenu = `
+┏━━°⌜ *OWNER MENU* ⌟°━━┓
+┃  ⭒ ${prefix}addgroup
+┃  ⭒ ${prefix}removegroup
+┃  ⭒ ${prefix}public
+┃  ⭒ ${prefix}self
+┃  ⭒ ${prefix}restart
+┃  ⭒ ${prefix}update
+┃  ⭒ ${prefix}addfile
+┃  ⭒ ${prefix}trash
+┃  ⭒ ${prefix}addcase
+┃  ⭒ ${prefix}addconst
+┃  ⭒ ${prefix}getfunc
+┃  ⭒ ${prefix}idch
+┃  ⭒ ${prefix}upchv1
+┃  ⭒ ${prefix}upchv2
+┃  ⭒ ${prefix}swgc
+┗━━━━━━━━━━━━━━━━━━
+
+┏━━°⌜ *UTILITY MENU* ⌟°━┓
+┃  ⭒ ${prefix}command1
+┃  ⭒ ${prefix}command2
+┗━━━━━━━━━━━━━━━━━━
+    `.trim();
+
+    // Kirim video sebagai GIF playback
+    await Raol404.sendMessage(m.chat, {
+        video: { url: 'https://files.catbox.moe/b1ipev.mp4' },
+        gifPlayback: true,
+        caption: `
+Halo *${pushname}*, berikut daftar lengkap fitur bot!
+
+▢ *Runtime* : ${botInfo.uptime}
+▢ *Mode* : ${botInfo.status}
+▢ *Version* : ${botInfo.version}
+
+${ownerMenu}
+
+📌 *Note*: 
+- Cooldown berlaku untuk beberapa fitur
+        `.trim(),
+        footer: `LatestURL | RaolProjects`,
+        contextInfo: {
+            mentionedJid: [m.sender],
+            forwardingScore: 20,
+            isForwarded: true,
+            externalAdReply: {
+                showAdAttribution: true,
+                title: 'FULL COMMAND LIST',
+                body: 'Tap to explore!',
+                thumbnailUrl: 'https://files.catbox.moe/rrv9rt.jpg',
+                sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46'
+            }
+        }
+    }, { quoted: ftroli });
+
+    // Kirim audio tambahan (opsional)
+    await Raol404.sendMessage(m.chat, {
+        audio: fs.readFileSync("./temporary/media/audio.mp3"),
+        mimetype: 'audio/mp4',
+        ptt: true
+    }, { quoted: ftroli });
+
+    break;
+}
 case 'addgroup': {
     // Hanya owner yang bisa menambahkan grup
     if (!isOwner) return reply(mess.owner)
@@ -969,6 +1073,71 @@ reply(`Restarting will be completed in seconds`)
 await sleep(3000)
 process.exit()
 break
+//===============================================//
+case 'update': {
+  if (!isCreator) return reply(mess.owner);
+
+  const defaultIndexUrl = 'https://raw.githubusercontent.com/latesturl/RaolProjects/refs/heads/master/index.js';
+  const defaultCaseUrl = 'https://raw.githubusercontent.com/latesturl/RaolProjects/refs/heads/master/case.js';
+
+  if (!args[0]) {
+    try {
+      const localIndexTimestamp = await getFileTimestamp('./index.js');
+      const localCaseTimestamp = await getFileTimestamp('./case.js');
+
+      const remoteIndexResponse = await axios.head(defaultIndexUrl);
+      const remoteCaseResponse = await axios.head(defaultCaseUrl);
+
+      const remoteIndexTime = new Date(remoteIndexResponse.headers['last-modified']).getTime();
+      const remoteCaseTime = new Date(remoteCaseResponse.headers['last-modified']).getTime();
+
+      if (localIndexTimestamp >= remoteIndexTime && localCaseTimestamp >= remoteCaseTime) {
+        return reply('All files are already up-to-date.');
+      }
+
+      await downloadFile(defaultIndexUrl, './index.js');
+      await downloadFile(defaultCaseUrl, './case.js');
+      reply('Successfully updated all files! Restarting...');
+      await sleep(3000);
+      process.exit(0);
+    } catch (error) {
+      reply('Failed to update default: ' + error.message);
+    }
+    break;
+  }
+
+  const inputUrl = args[0];
+  
+  if (!isValidUrl(inputUrl)) {
+    return reply('Invalid URL format! Example: https://example.com/index.js');
+  }
+
+  const targetFile = inputUrl.includes('index.js') ? 'index.js' : 
+                    inputUrl.includes('case.js') ? 'case.js' : 
+                    null;
+
+  if (!targetFile) {
+    return reply('URL must point to index.js or case.js!');
+  }
+
+  try {
+    const localTime = await getFileTimestamp(`./${targetFile}`);
+    const remoteResponse = await axios.head(inputUrl);
+    const remoteTime = new Date(remoteResponse.headers['last-modified']).getTime();
+
+    if (localTime >= remoteTime) {
+      return reply(`File ${targetFile} is already the latest version.`);
+    }
+
+    await downloadFile(inputUrl, `./${targetFile}`);
+    reply(`Successfully updated ${targetFile}! Restarting...`);
+    await sleep(3000);
+    process.exit(0);
+  } catch (error) {
+    reply(`Failed to update ${targetFile}: ` + error.message);
+  }
+  break;
+}
 //===============================================//
 default:
 
