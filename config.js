@@ -5,7 +5,7 @@ global.calender = d.toLocaleDateString('id')
 
     //General Settings 
 global.prefa = ['','!','.',',','🐤','🗿']
-global.ownNumb = '6287782645063' //do not replace
+global.ownNumb = '' //do not replace
 global.NamaOwner = 'Raol404' //do not replace
 global.sessionName = 'session' //do not replace
 global.namabot = 'LatestURL | RaolProjects' //do not replace

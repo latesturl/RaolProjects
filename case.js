@@ -262,69 +262,62 @@ switch (command) {
 case "menu": case "help": {
     Raol404.sendMessage(m.chat, { react: { text: `${randomemoji}`, key: m.key }});
     addCountCmd('#menu', m.sender, _cmd);
-    const owned = global.ownNumb + "@s.whatsapp.net";
-    let msg = `Selamat datang kak *${pushname}*`;
 
+    const owned = global.ownNumb + "@s.whatsapp.net";
+
+    // Informasi Bot
+    const botInfo = {
+        status: Raol404.public ? "Public Mode" : "Self Mode",
+        version: "3.0.5",
+        uptime: runtime(process.uptime())
+    };
+
+    // Informasi Newsletter
+    const newsletterInfo = {
+        newsletterName: "LatestURL | RaolProjects", // Nama saluran newsletter
+        newsletterJid: "120363378800202820@newsletter", // JID newsletter
+        thumbnailUrl: 'https://files.catbox.moe/oof6ot.jpg', // Thumbnail saluran
+        sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46' // Link saluran
+    };
+
+    // Kirim video sebagai GIF playback dengan newsletter info
     await Raol404.sendMessage(m.chat, {
-        image: { url: 'https://files.catbox.moe/oof6ot.jpg' }, // Ganti dengan URL gambar Anda
-        caption: `Halo kak *${pushname}*, ini adalah menu bot!\n\n─ Waktu: *${ucapanWaktu}*\n─ Runtime: *${runtime(process.uptime())}*`,
+        video: { url: 'https://files.catbox.moe/b1ipev.mp4' },
+        gifPlayback: true,
+        caption: `Halo kak *${pushname}*, ini adalah menu bot!\n\n` +
+                 `─ Waktu: *${ucapanWaktu}*\n` +
+                 `─ Runtime: *${botInfo.uptime}*\n` +
+                 `─ Status: *${botInfo.status}*\n` +
+                 `─ Versi Bot: *${botInfo.version}*\n\n` +
+                 `To see the full features, type:\n` +
+                 `- *.allmenu*\n`,
         footer: `Powered by Raol404`,
         contextInfo: {
             mentionedJid: [m.sender, owned],
-            forwardingScore: 20,
+            forwardingScore: 0, // Skor forwarding tinggi untuk efek newsletter
             isForwarded: true,
+            forwardedNewsletterMessageInfo: {
+                newsletterName: newsletterInfo.newsletterName,
+                newsletterJid: newsletterInfo.newsletterJid,
+            },
             externalAdReply: {
                 showAdAttribution: true,
-                title: `Your Bot Name`,
+                title: "Your Bot Name",
                 body: "Your Bot Description",
-                thumbnailUrl: 'https://files.catbox.moe/xr2sbs.jpg', // Ganti dengan URL thumbnail Anda
-                sourceUrl: "https://example.com", // Ganti dengan URL sumber Anda
+                thumbnailUrl: newsletterInfo.thumbnailUrl,
+                sourceUrl: newsletterInfo.sourceUrl,
                 mediaType: 1,
-                renderLargerThumbnail: false
+                renderLargerThumbnail: true
             }
-        },
-        buttons: [
-            {
-                type: 4,
-                nativeFlowInfo: {
-                    name: 'single_select',
-                    paramsJson: JSON.stringify({
-                        title: 'Select Menu',
-                        sections: [
-                            {
-                                title: 'Main Course',
-                                highlight_label: '',
-                                rows: [
-                                    {
-                                        header: '⌬ オーナーメニュー',
-                                        title: '└ オーナーメニューの表示',
-                                        description: `Special features for bot owners`,
-                                        id: ' ',
-                                    },
-                                    {
-                                        header: '⌬ Menu Grup',
-                                        title: '└ Menampilkan Menu Grup',
-                                        description: `SOON`,
-                                        id: ' ',
-                                    },
-                                    {
-                                        header: '⌬ Menu Download',
-                                        title: '└ Menampilkan Menu Download',
-                                        description: `SOON`,
-                                        id: ' ',
-                                    },
-                                ],
-                            },
-                        ],
-                    }),
-                },
-            },
-        ],
-        headerType: 1,
-        viewOnce: true
-    });
+        }
+    }, { quoted: ftroli });
 
-    await Raol404.sendMessage(m.chat, { audio: fs.readFileSync("./temporary/media/audio.mp3"), mimetype: 'audio/mp4', ptt: true }, { quoted: ftroli }); // Ganti dengan path file audio Anda
+    // Kirim audio
+    await Raol404.sendMessage(m.chat, {
+        audio: fs.readFileSync("./temporary/media/audio.mp3"),
+        mimetype: 'audio/mp4',
+        ptt: true
+    }, { quoted: ftroli });
 }
 break;
 case 'addgroup': {
