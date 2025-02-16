@@ -304,13 +304,13 @@ case "menu": case "help": {
     const newsletterInfo = {
         newsletterName: "LatestURL | RaolProjects", // Nama saluran newsletter
         newsletterJid: "120363378800202820@newsletter", // JID newsletter
-        thumbnailUrl: 'https://files.catbox.moe/oof6ot.jpg', // Thumbnail saluran
+        thumbnailUrl: 'https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menu.jpg', // Thumbnail saluran
         sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46' // Link saluran
     };
 
     // Kirim video sebagai GIF playback dengan newsletter info
     await Raol404.sendMessage(m.chat, {
-        video: { url: 'https://files.catbox.moe/b1ipev.mp4' },
+        video: { url: 'https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menuv2.mp4' },
         gifPlayback: true,
         caption: `Halo kak *${pushname}*, ini adalah menu bot!\n\n` +
                  `─ Waktu: *${ucapanWaktu}*\n` +
@@ -361,21 +361,21 @@ case 'allmenu': {
     // Daftar Menu (Urutan: Download > Search > Tools > Fun > Owner > Utility)
     const funMenu = `
 ┏━━°⌜ *DOWNLOAD MENU* ⌟°━━┓
-┃  ⭒ (Fitur dalam pengembangan)
-┗━━━━━━━━━━━━━━━━━━━━━━━┛
+┃  ⭒ (Coming Soon)
+┗━━━━━━━━━━━━━━━━━━
 
 ┏━━°⌜ *SEARCH MENU* ⌟°━━┓
-┃  ⭒ (Fitur dalam pengembangan)
-┗━━━━━━━━━━━━━━━━━━━━━━┛
+┃  ⭒ (Coming Soon)
+┗━━━━━━━━━━━━━━━━━━
 
 ┏━━°⌜ *TOOLS MENU* ⌟°━━┓
-┃  ⭒ (Fitur dalam pengembangan)
-┗━━━━━━━━━━━━━━━━━━━━━━┛
+┃  ⭒ (Coming Soon)
+┗━━━━━━━━━━━━━━━━━━
 
 ┏━━°⌜ *FUN MENU* ⌟°━━┓
 ┃  ⭒ ${prefix}brat
 ┃  ⭒ ${prefix}bratvid
-┗━━━━━━━━━━━━━━━━━━━━┛
+┗━━━━━━━━━━━━━━━━━━
 
 ┏━━°⌜ *OWNER MENU* ⌟°━━┓
 ┃  ⭒ ${prefix}addgroup
@@ -401,8 +401,9 @@ case 'allmenu': {
 ┗━━━━━━━━━━━━━━━━━━`.trim()
 
     try {
+        // Kirim gambar menu
         await Raol404.sendMessage(m.chat, {
-            image: { url: 'https://files.catbox.moe/oof6ot.jpg' },
+            image: { url: 'https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menu.jpg' },
             caption: `
 Halo *${pushname}*, berikut daftar lengkap fitur bot!
 
@@ -417,6 +418,7 @@ ${funMenu}
             footer: `LatestURL | RaolProjects`
         }, { quoted: m })
 
+        // Kirim audio tambahan (opsional)
         await Raol404.sendMessage(m.chat, {
             audio: fs.readFileSync("./temporary/media/audio.mp3"),
             mimetype: 'audio/mp4',
