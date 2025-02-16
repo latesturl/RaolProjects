@@ -181,28 +181,69 @@ const Raol = (text, style = 1) => {
 };
 //Reply
 const reply = async (teks) => {
-const Thezy = {
-contextInfo: {
-forwardingScore: 20,
-isForwarded: true,
-forwardedNewsletterMessageInfo: {
-newsletterName: `LatestURL | RaolProjects`,
-newsletterJid: `120363378800202820@newsletter`,
-},
-externalAdReply: {
-showAdAttribution: true,
-title: `LatestURL | RaolProjects`, 
-body: `${ucapanWaktu}`, 
-thumbnailUrl: `https://files.catbox.moe/rrv9rt.jpg`, 
-thumbnail: '',
-sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46', 
-},
-},
-text: teks, 
-};
-return Raol404.sendMessage(m.chat, Thezy, {
-quoted: ftroli, ephemeralExpiration: 1,
-});
+    try {
+        // Validasi input teks
+        if (!teks || typeof teks !== 'string') {
+            throw new Error('Invalid text input. Text must be a non-empty string.');
+        }
+
+        // Konfigurasi pesan
+        const Thezy = {
+            contextInfo: {
+                forwardingScore: 20,
+                isForwarded: true,
+                forwardedNewsletterMessageInfo: {
+                    newsletterName: `LatestURL | RaolProjects`,
+                    newsletterJid: `120363378800202820@newsletter`,
+                },
+                externalAdReply: {
+                    showAdAttribution: true,
+                    title: `LatestURL | RaolProjects`,
+                    body: `${ucapanWaktu}`,
+                    thumbnailUrl: `https://files.catbox.moe/rrv9rt.jpg`,
+                    thumbnail: '',
+                    sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46',
+                },
+            },
+            text: teks,
+        };
+
+        // Kirim pesan
+        const sentMessage = await Raol404.sendMessage(m.chat, Thezy, {
+            quoted: ftroli,
+            ephemeralExpiration: 1,
+        });
+
+        // Log pesan yang berhasil dikirim
+        console.log(chalk.green(`[REPLY SUCCESS] Message sent to ${m.chat}`));
+        return sentMessage;
+
+    } catch (error) {
+        // Log error
+        console.error(chalk.red(`[REPLY ERROR]`), error);
+
+        // Kirim pesan error ke pengguna
+        try {
+            await Raol404.sendMessage(m.chat, {
+                text: `❌ Gagal mengirim pesan. Error: ${error.message}`,
+            });
+        } catch (fallbackError) {
+            console.error(chalk.red(`[FALLBACK ERROR]`), fallbackError);
+        }
+
+        // Kirim error ke admin
+        const errId = `${global.ownNumb}@s.whatsapp.net`;
+        try {
+            await Raol404.sendMessage(errId, {
+                text: `⚠️ [REPLY ERROR] ⚠️\n\n` +
+                      `• Chat: ${m.chat}\n` +
+                      `• Sender: ${m.sender}\n` +
+                      `• Error: ${error.stack || error.message}`,
+            });
+        } catch (adminError) {
+            console.error(chalk.red(`[ADMIN ERROR]`), adminError);
+        }
+    }
 };
 
 const pluginsLoader = async (directory) => {
@@ -349,8 +390,8 @@ case "menu": case "help": {
 }
 break;
 case 'allmenu': {
-    Raol404.sendMessage(m.chat, { react: { text: `${randomemoji}`, key: m.key }});
-    addCountCmd('#allmenu', m.sender, _cmd);
+    Raol404.sendMessage(m.chat, { react: { text: `${randomemoji}`, key: m.key }})
+    addCountCmd('#allmenu', m.sender, _cmd)
 
     const botInfo = {
         status: Raol404.public ? "Public Mode" : "Self Mode",
@@ -381,14 +422,13 @@ case 'allmenu': {
 ┏━━°⌜ *UTILITY MENU* ⌟°━┓
 ┃  ⭒ ${prefix}command1
 ┃  ⭒ ${prefix}command2
-┗━━━━━━━━━━━━━━━━━━
-    `.trim();
+┗━━━━━━━━━━━━━━━━━━`.trim()
 
-    // Kirim video sebagai GIF playback
-    await Raol404.sendMessage(m.chat, {
-        video: { url: 'https://files.catbox.moe/b1ipev.mp4' },
-        gifPlayback: true,
-        caption: `
+    try {
+        // Kirim gambar tanpa contextInfo
+        await Raol404.sendMessage(m.chat, {
+            image: { url: 'https://files.catbox.moe/oof6ot.jpg' },
+            caption: `
 Halo *${pushname}*, berikut daftar lengkap fitur bot!
 
 ▢ *Runtime* : ${botInfo.uptime}
@@ -398,31 +438,24 @@ Halo *${pushname}*, berikut daftar lengkap fitur bot!
 ${ownerMenu}
 
 📌 *Note*: 
-- Cooldown berlaku untuk beberapa fitur
-        `.trim(),
-        footer: `LatestURL | RaolProjects`,
-        contextInfo: {
-            mentionedJid: [m.sender],
-            forwardingScore: 0,
-            isForwarded: true,
-            externalAdReply: {
-                showAdAttribution: true,
-                title: 'FULL COMMAND LIST',
-                body: 'Tap to explore!',
-                thumbnailUrl: 'https://files.catbox.moe/rrv9rt.jpg',
-                sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46'
-            }
-        }
-    }, { quoted: ftroli });
+- Cooldown berlaku untuk beberapa fitur`.trim(),
+            footer: `LatestURL | RaolProjects`
+        }, { quoted: m })
 
-    // Kirim audio tambahan (opsional)
-    await Raol404.sendMessage(m.chat, {
-        audio: fs.readFileSync("./temporary/media/audio.mp3"),
-        mimetype: 'audio/mp4',
-        ptt: true
-    }, { quoted: ftroli });
+        // Kirim audio tambahan (opsional)
+        await Raol404.sendMessage(m.chat, {
+            audio: fs.readFileSync("./temporary/media/audio.mp3"),
+            mimetype: 'audio/mp4',
+            ptt: true
+        }, { quoted: ftroli })
 
-    break;
+    } catch (error) {
+        console.error('Allmenu Error:', error)
+        Raol404.sendMessage(m.chat, { 
+            text: `❌ Gagal menampilkan menu. Error: ${error.message}`
+        })
+    }
+    break
 }
 case 'addgroup': {
     // Hanya owner yang bisa menambahkan grup
