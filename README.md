@@ -49,6 +49,9 @@ PASSWORD: admin#123
 Owner | Recode
 
 ## **All DONATE**
+<a href="https://github.com/rrykarlsefni"><img src="https://avatars.githubusercontent.com/u/191301182?v=4" width="100" height="100"></a> | <a href="https://github.com/nisangh"><img src="https://avatars.githubusercontent.com/u/134959483?v=4" width="100" height="100"></a>
+---|---
+[rrykarlsefni](https://github.com/rrykarlsefni) | [nisangh](https://github.com/nisangh)  
 ---
 ### Installation
 1. Clone the repository to your local machine:
