@@ -56,37 +56,92 @@ const isValidUrl = (url) => {
   }
 };
 
-const checkForUpdates = async () => {
-    const defaultIndexUrl = 'https://raw.githubusercontent.com/latesturl/RaolProjects/refs/heads/master/index.js';
-    const defaultCaseUrl = 'https://raw.githubusercontent.com/latesturl/RaolProjects/refs/heads/master/case.js';
 
+//========= PENGINGAT SHOLAT =========//
+async function getPrayerTimes(city, country) {
     try {
-        const localIndexTimestamp = await getFileTimestamp('./index.js');
-        const localCaseTimestamp = await getFileTimestamp('./case.js');
-
-        const remoteIndexResponse = await axios.head(defaultIndexUrl);
-        const remoteCaseResponse = await axios.head(defaultCaseUrl);
-
-        const remoteIndexTime = new Date(remoteIndexResponse.headers['last-modified']).getTime();
-        const remoteCaseTime = new Date(remoteCaseResponse.headers['last-modified']).getTime();
-
-        if (localIndexTimestamp < remoteIndexTime || localCaseTimestamp < remoteCaseTime) {
-            const ownerJid = `${global.ownNumb}@s.whatsapp.net`; // JID owner
-            const updateMessage = `🚀 *Ada pembaruan tersedia!*\n\nSilakan jalankan command *.update* untuk memperbarui bot.`;
-
-            await Raol404.sendMessage(ownerJid, { text: updateMessage }, { quoted: null });
-        }
+        const response = await axios.get(`http://api.aladhan.com/v1/timingsByCity`, {
+            params: {
+                city: city,
+                country: country,
+                method: 2, // Metode ISNA
+                timezonestring: 'Asia/Jakarta' // Sesuaikan dengan zona waktu
+            }
+        });
+        return response.data.data.timings;
     } catch (error) {
-        console.error('Gagal memeriksa pembaruan:', error);
+        console.error('Gagal mengambil jadwal sholat:', error);
+        return null;
     }
-};
+}
 
-// Jalankan fungsi cek update setiap 1 jam
-// Dari ini:
-// setInterval(checkForUpdates, 60 * 60 * 1000); // 1 jam
+async function sendPrayerReminder(Raol404, city, country) {
+    const prayerTimes = await getPrayerTimes(city, country);
+    if (!prayerTimes) return;
 
-// Menjadi ini:
-setInterval(checkForUpdates, 30 * 1000); // 30 detik (30,000 milidetik)
+    const now = moment().tz('Asia/Jakarta');
+    const prayerNames = {
+        Fajr: 'Subuh',
+        Dhuhr: 'Dzuhur',
+        Asr: 'Ashar',
+        Maghrib: 'Maghrib',
+        Isha: 'Isha'
+    };
+
+    // Dapatkan daftar semua grup yang ada
+    const groupList = await Raol404.groupFetchAllParticipating();
+    const groupIds = Object.keys(groupList);
+
+    for (const groupId of groupIds) {
+        for (const [prayerName, prayerTime] of Object.entries(prayerTimes)) {
+            if (prayerNames[prayerName]) {
+                const prayerMoment = moment.tz(`${now.format('YYYY-MM-DD')} ${prayerTime}`, 'YYYY-MM-DD HH:mm', 'Asia/Jakarta');
+                const diffInMinutes = prayerMoment.diff(now, 'minutes');
+
+                // Banner untuk pengingat sholat
+                const bannerInfo = {
+                    title: `🕌 Waktu Sholat ${prayerNames[prayerName]}`, // Judul banner
+                    body: `⏰ ${prayerTime} | ${city}, ${country}`, // Deskripsi banner
+                    thumbnailUrl: 'https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menu.jpg', // URL gambar banner
+                    sourceUrl: 'https://whatsapp.com/channel/0029VazeUE92Jl8KuVcHIC46', // Link yang akan dibuka saat banner diklik
+                    mediaType: 1 // Tipe media (1 untuk gambar)
+                };
+
+                // Kirim pengingat 5 menit sebelum sholat
+                if (diffInMinutes === 5) {
+                    await Raol404.sendMessage(groupId, {
+                        text: `⏰ Waktu *${prayerNames[prayerName]}* tinggal 5 menit lagi!\n⏳ Jam: ${prayerTime}`,
+                        contextInfo: {
+                            externalAdReply: bannerInfo
+                        }
+                    });
+                }
+
+                // Kirim adzan saat waktu sholat tiba
+                if (diffInMinutes <= 0 && diffInMinutes >= -2) { // Toleransi 2 menit
+                    const adzanAudio = 'https://files.catbox.moe/0nj6pp.mp3';
+                    await Raol404.sendMessage(groupId, {
+                        text: `🕌 *Waktu ${prayerNames[prayerName]} Telah Tiba!*\n🕒 Jam: ${prayerTime}`,
+                        audio: { url: adzanAudio },
+                        mimetype: 'audio/mp4',
+                        ptt: true,
+                        contextInfo: {
+                            externalAdReply: bannerInfo
+                        }
+                    });
+                }
+            }
+        }
+    }
+}
+
+function startPrayerReminder(Raol404, city, country) {
+    setInterval(() => {
+        sendPrayerReminder(Raol404, city, country);
+    }, 60000); // Cek setiap 1 menit
+}
+
+//=========================//
 
 //Base
 module.exports = Raol404 = async (Raol404, m, chatUpdate, store) => {
@@ -238,25 +293,25 @@ quoted: ftroli, ephemeralExpiration: 1,
 };
 
 const pluginsLoader = async (directory) => {
-let plugins = [];
-const folders = fs.readdirSync(directory);
-folders.forEach(file => {
-const filePath = path.join(directory, file);
-if (filePath.endsWith(".js")) {
-try {
-const resolvedPath = require.resolve(filePath);
-if (require.cache[resolvedPath]) {
-delete require.cache[resolvedPath];
-}
-const plugin = require(filePath);
-plugins.push(plugin);
-} catch (error) {
-console.log(`${filePath}:`, error);
-}
-}
-});
-return plugins;
-};
+     let plugins = [];
+     const folders = fs.readdirSync(directory);
+     folders.forEach(file => {
+       const filePath = path.join(directory, file);
+       if (filePath.endsWith(".js")) {
+         try {
+           const resolvedPath = require.resolve(filePath);
+           if (require.cache[resolvedPath]) {
+             delete require.cache[resolvedPath];
+           }
+           const plugin = require(filePath);
+           plugins.push(plugin);
+         } catch (error) {
+           console.log(`${filePath}:`, error);
+         }
+       }
+     });
+     return plugins;
+   };
 
 const pluginsDisable = true;
 const plugins = await pluginsLoader(path.resolve(__dirname, "./plugins"));
@@ -278,23 +333,23 @@ isPrivate: !m.isGroup
 };
 
 for (let plugin of plugins) {
-if (plugin.command.find(e => e == command.toLowerCase())) {
-if (plugin.owner && !isOwner) {
-return reply(mess.owner);
-}
-if (plugin.premium && !isPremium) {
-return reply(mess.premium);
-}
-if (plugin.group && !plug.isGroup) {
-return reply(mess.ingroup);
-}
-if (plugin.private && !plug.isPrivate) {
-return reply(mess.private);
-}
-if (typeof plugin !== "function") return;
-await plugin(m, plug);
-}
-}
+     if (plugin.command.find(e => e == command.toLowerCase())) {
+       if (plugin.owner && !isOwner) {
+         return reply(mess.owner);
+       }
+       if (plugin.premium && !isPremium) {
+         return reply(mess.premium);
+       }
+       if (plugin.group && !plug.isGroup) {
+         return reply(mess.ingroup);
+       }
+       if (plugin.private && !plug.isPrivate) {
+         return reply(mess.private);
+       }
+       if (typeof plugin !== "function") return;
+       await plugin(m, plug);
+     }
+   }
 
 if (!pluginsDisable) return;
 
@@ -1243,6 +1298,54 @@ case 'getcase': {
     }
 }
 break;
+case 'done': {
+    // Cek apakah ada argumen yang diberikan
+    if (!isCreator) return reply(mess.owner);
+    if (!text) return reply(`Contoh penggunaan: ${prefix}done <nominal> <barang>`);
+
+    // Pisahkan argumen
+    const [nominal, ...barangParts] = text.split(' ');
+    const barang = barangParts.join(' ');
+
+    // Validasi nominal
+    if (!nominal || isNaN(nominal)) return reply('Nominal harus berupa angka!');
+
+    // Format nominal ke dalam mata uang Rupiah
+    const formattedNominal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(nominal);
+
+    // Ambil waktu dan tanggal saat ini
+    const moment = require('moment-timezone');
+    const waktu = moment().tz("Asia/Jakarta").format("HH:mm:ss");
+    const tanggal = moment().tz("Asia/Jakarta").format("DD MMMM YYYY");
+
+    // Informasi admin (bisa disesuaikan)
+    const admin = "6283822021601"; // Nomor admin
+
+    // Format pesan transaksi berhasil
+    const transaksiMessage = `
+*TRANSAKSI BERHASIL* ✅
+\`Detail Pesanan\`
+[💸] *Nominal :* ${formattedNominal}
+[🎁] *Barang :* ${barang}
+[⌚] *Jam :* ${waktu} WIB
+[🗓] *Tanggal :* ${tanggal}
+[👤] *Admin:* ${admin}
+
+> © Raol404
+    `.trim();
+
+    // Kirim pesan transaksi
+    await Raol404.sendMessage(m.chat, { text: transaksiMessage }, { quoted: m });
+
+    break;
+}
+case 'sholat': {
+    const city = 'Jakarta'; // Ganti dengan kota
+    const country = 'Indonesia'; // Ganti dengan negara
+    startPrayerReminder(Raol404, city, country);
+    reply(`🕋 Pengingat sholat untuk *${city}, ${country}* diaktifkan di semua grup!`);
+    break;
+}
 //===============================================//
 case 'restart':
 if (!isCreator) return reply(mess.owner)
@@ -1396,9 +1499,6 @@ function autoClearSession() {
 
 // Jalankan saat panel start
 autoClearSession();
-
-// Jalankan cek update saat bot start
-checkForUpdates();
 
 // JANGAN UBAH KODE DI BAWAH INI
 let file = require.resolve(__filename)
