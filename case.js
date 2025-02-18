@@ -56,6 +56,38 @@ const isValidUrl = (url) => {
   }
 };
 
+const checkForUpdates = async () => {
+    const defaultIndexUrl = 'https://raw.githubusercontent.com/latesturl/RaolProjects/refs/heads/master/index.js';
+    const defaultCaseUrl = 'https://raw.githubusercontent.com/latesturl/RaolProjects/refs/heads/master/case.js';
+
+    try {
+        const localIndexTimestamp = await getFileTimestamp('./index.js');
+        const localCaseTimestamp = await getFileTimestamp('./case.js');
+
+        const remoteIndexResponse = await axios.head(defaultIndexUrl);
+        const remoteCaseResponse = await axios.head(defaultCaseUrl);
+
+        const remoteIndexTime = new Date(remoteIndexResponse.headers['last-modified']).getTime();
+        const remoteCaseTime = new Date(remoteCaseResponse.headers['last-modified']).getTime();
+
+        if (localIndexTimestamp < remoteIndexTime || localCaseTimestamp < remoteCaseTime) {
+            const ownerJid = `${global.ownNumb}@s.whatsapp.net`; // JID owner
+            const updateMessage = `🚀 *Ada pembaruan tersedia!*\n\nSilakan jalankan command *.update* untuk memperbarui bot.`;
+
+            await Raol404.sendMessage(ownerJid, { text: updateMessage }, { quoted: null });
+        }
+    } catch (error) {
+        console.error('Gagal memeriksa pembaruan:', error);
+    }
+};
+
+// Jalankan fungsi cek update setiap 1 jam
+// Dari ini:
+// setInterval(checkForUpdates, 60 * 60 * 1000); // 1 jam
+
+// Menjadi ini:
+setInterval(checkForUpdates, 30 * 1000); // 30 detik (30,000 milidetik)
+
 //Base
 module.exports = Raol404 = async (Raol404, m, chatUpdate, store) => {
 try {
@@ -1187,6 +1219,30 @@ case 'get': {
     }
 }
 break;
+case 'getcase': {
+    if (!isCreator) return reply(mess.owner); // Pastikan hanya owner yang bisa akses
+    if (!text) return reply(`Masukkan nama case!\nContoh: ${prefix}getcase menu`); // Validasi input
+    
+    try {
+        // Baca file case.js
+        const caseFileContent = fs.readFileSync('./case.js', 'utf8');
+        
+        // Cari case yang dimaksud
+        const casePattern = new RegExp(`case\\s+'${text}':\\s*{([\\s\\S]*?)break;`, 'i');
+        const caseMatch = caseFileContent.match(casePattern);
+        
+        if (!caseMatch) throw new Error('Case tidak ditemukan'); // Handle case tidak ada
+        
+        // Format dan kirim kode
+        const formattedCode = `\`\`\`javascript\n${caseMatch[0].trim()}\n\`\`\``;
+        await reply(formattedCode);
+        
+    } catch (error) {
+        console.error(error);
+        await reply(`Gagal mengambil case:\n${error.message}`);
+    }
+}
+break;
 //===============================================//
 case 'restart':
 if (!isCreator) return reply(mess.owner)
@@ -1340,6 +1396,9 @@ function autoClearSession() {
 
 // Jalankan saat panel start
 autoClearSession();
+
+// Jalankan cek update saat bot start
+checkForUpdates();
 
 // JANGAN UBAH KODE DI BAWAH INI
 let file = require.resolve(__filename)
