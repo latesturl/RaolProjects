@@ -1,6 +1,4 @@
-<h1 align="center">
-	<img width="512" src="https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menu.jpg" alt="RaolProjects"><p>
-</h1>
+![RaolProjects](https://cardivo.vercel.app/api?name=Raol%20Projects&description=🎁Base%20WhatsApp%20bot%20type%20case%20and%20plugins%20(cjs)&image=https://files.catbox.moe/j7k8st.jpg&backgroundColor=%23ecf0f1&github=latesturl&pattern=leaf&colorPattern=%23eaeaea)
 
 <br>
 <p align="center">
