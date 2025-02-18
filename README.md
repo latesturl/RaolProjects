@@ -51,7 +51,9 @@ Owner | Recode
 ## **All DONATE**
 <a href="https://github.com/rrykarlsefni"><img src="https://avatars.githubusercontent.com/u/191301182?v=4" width="100" height="100"></a> | <a href="https://github.com/nisangh"><img src="https://avatars.githubusercontent.com/u/134959483?v=4" width="100" height="100"></a>
 ---|---
-[rrykarlsefni](https://github.com/rrykarlsefni) | [nisangh](https://github.com/nisangh)  
+[rrykarlsefni](https://github.com/rrykarlsefni) | [nisangh](https://github.com/nisangh)
+<a href="https://github.com/iRasz"><img src="https://avatars.githubusercontent.com/u/151460846?v=4" width="100" height="100"></a> | <a href="https://github.com/akaanakbaik"><img src="https://avatars.githubusercontent.com/u/177374174?v=4" width="100" height="100"></a>
+[iRasz](https://github.com/iRasz) | [akaanakbaik](https://github.com/akaanakbaik)  
 ---
 ### Installation
 1. Clone the repository to your local machine:
