@@ -32,8 +32,8 @@ PASSWORD: admin#123
 - **DOWNLOAD MENU ( SOON )**
 - **SEARCH MENU ( SOON )**
 - **TOOLS MENU ( SOON )**
-- **FUN MENU [✓]**
-- **OWNER MENU [✓]**
+- **FUN MENU [ SOON ]**
+- **OWNER MENU [ SOON ]**
 
 ## Contact Me:
 - **Gmail: latesturltech@gmail.com**
