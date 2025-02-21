@@ -140,64 +140,11 @@ module.exports = Raol404 = async (Raol404, m, chatUpdate, store) => {
         const isAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false;
         const groupOwner = m.isGroup && groupMetadata ? groupMetadata.owner : '';
         const isGroupOwner = m.isGroup ? (groupOwner ? groupOwner : groupAdmins).includes(m.sender) : false;
-        
-        // AUTO SHOLAT
-        Raol404.autoshalat = Raol404.autoshalat ? Raol404.autoshalat : {};
-        let id = m.chat;
-
-        if (id in Raol404.autoshalat) {
-            return false;
-        }
-
-        let jadwalSholat = {
-            shubuh: '04:39',
-            dzuhur: '12:06',
-            ashar: '15:15',
-            magrib: '18:14',
-            isya: '19:25',
-        };
-
-        const prayertime = new Date((new Date).toLocaleString("en-US", {
-            timeZone: "Asia/Jakarta"
-        }));
-
-        const hours = prayertime.getHours();
-        const minutes = prayertime.getMinutes();
-        const timeNow = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-
-        for (let [sholat, waktu] of Object.entries(jadwalSholat)) {
-            if (timeNow === waktu) {
-                Raol404.autoshalat[id] = [
-                    Raol404.sendMessage(m.chat, {
-                        audio: {
-                            url: 'https://files.catbox.moe/0nj6pp.mp3'
-                        },
-                        mimetype: 'audio/mp4',
-                        ptt: true,
-                        contextInfo: {
-                            externalAdReply: {
-                                showAdAttribution: true,
-                                mediaType: 1,
-                                mediaUrl: '',
-                                title: `Selamat menunaikan Ibadah Sholat ${sholat}`,
-                                body: `🕑 ${waktu}`,
-                                sourceUrl: '',
-                                thumbnailUrl: 'https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menu.jpg',
-                                renderLargerThumbnail: true
-                            }
-                        }
-                    }, { quoted: ftroli }),
-                    setTimeout(async () => {
-                        delete Raol404.autoshalat[m.chat];
-                    }, 600000)
-                ];
-            }
-        }
 
         // ACCESS
 
         // REACT
-        const moji = ['📚', '💭', '💫', '🌌', '🌏', '✨', '🌷', '🍁', '🪻'];
+        const moji = ['📚', '💭', '💫', '🌌', '🌏', '〽️', '🌷', '🍁', '🪻'];
         const randomemoji = moji[Math.floor(Math.random() * moji.length)];
 
         // TIME
@@ -464,248 +411,7 @@ case "menu": case "help": {
     }, { quoted: ftroli });
 }
 break;
-case 'ping': {
-    const used = process.memoryUsage();
-    const cpus = os.cpus().map(cpu => {
-        cpu.total = Object.keys(cpu.times).reduce((last, type) => last + cpu.times[type], 0);
-        return cpu;
-    });
 
-    const cpu = cpus.reduce((last, cpu, _, { length }) => {
-        last.total += cpu.total;
-        last.speed += cpu.speed / length;
-        last.times.user += cpu.times.user;
-        last.times.nice += cpu.times.nice;
-        last.times.sys += cpu.times.sys;
-        last.times.idle += cpu.times.idle;
-        last.times.irq += cpu.times.irq;
-        return last;
-    }, {
-        speed: 0,
-        total: 0,
-        times: {
-            user: 0,
-            nice: 0,
-            sys: 0,
-            idle: 0,
-            irq: 0
-        }
-    });
-
-    let timestamp = speed();
-    let latensi = speed() - timestamp;
-    let neww = performance.now();
-    let oldd = performance.now();
-    let respon = Raol(`
-Response Speed ${latensi.toFixed(4)} _Second_\n${oldd - neww} _miliseconds_\n\nRuntime: ${runtime(process.uptime())}
-
-💻 Info Server
-RAM: ${formatp(os.totalmem() - os.freemem())} / ${formatp(os.totalmem())}
-
-_NodeJS Memory Usage_
-${Object.keys(used).map((key, _, arr) => `${key.padEnd(Math.max(...arr.map(v => v.length)), ' ')}: ${formatp(used[key])}`).join('\n')}
-
-${cpus[0] ? `_Total CPU Usage_
-${cpus[0].model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}
-_CPU Core(s) Usage (${cpus.length} Core CPU)_
-${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Object.keys(cpu.times).map(type => `- *${(type + '*').padEnd(6)}: ${(100 * cpu.times[type] / cpu.total).toFixed(2)}%`).join('\n')}`).join('\n\n')}` : ''}
-    `.trim());
-
-    Raol404.relayMessage(m.chat, {
-        requestPaymentMessage: {
-            currencyCodeIso4217: 'USD',
-            amount1000: 50000,
-            requestFrom: m.sender,
-            noteMessage: {
-                extendedTextMessage: {
-                    text: respon,
-                    contextInfo: {
-                        externalAdReply: {
-                            showAdAttribution: true
-                        }
-                    }
-                }
-            }
-        }
-    }, {});
-    break;
-}
-case 'runtime': {
-    let anulistg = await store.chats.all().filter(v => v.id.endsWith('@g.us')).map(v => v.id);
-
-    await Raol404.relayMessage(m.chat, {
-        "pollResultSnapshotMessage": {
-            "name": `
-┏━━━━━━━━━━━━━━━┓                          
-┃ ◈ ${ucapanWaktu}
-┗━━━━━━━━━━━━━━━┛
-`,
-            "pollVotes": [
-                {
-                    "optionName": "coming soon: ",
-                    "optionVoteCount": `9999`
-                }, {
-                    "optionName": "coming soon: ",
-                    "optionVoteCount": `9999`
-                }, {
-                    "optionName": "coming soon: ",
-                    "optionVoteCount": `9999`
-                }
-            ],
-        }
-    }, { quoted: ftroli });
-}
-break;
-//============ STORE MENU ============//
-
-//============ TOOLS MENU ============//
-case 'brat': {
-    if (!text) return reply('Please provide the text as well');
-    const apiUrl = `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text)}`;
-    await Raol404.sendImageAsSticker(m.chat, apiUrl, m, {
-        packname: global.packname,
-        author: global.author
-    });
-    break;
-}
-
-case 'bratvid': {
-    const { execSync } = require('child_process');
-    const tempDir = path.join(process.cwd(), 'temporary/');
-    const framePaths = [];
-
-    if (!text) return reply(`Example: ${prefix + command} hello i am RaolProjects`);
-    if (text.length > 40) return reply(`Character limit exceeded, max 40 characters!`);
-
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-
-    try {
-        const words = text.split(" ");
-        for (let i = 0; i < words.length; i++) {
-            const currentText = words.slice(0, i + 1).join(" ");
-            const res = await axios.get(
-                `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(currentText)}`,
-                { responseType: "arraybuffer" }
-            ).catch((e) => e.response);
-
-            const framePath = path.join(tempDir, `frame${i}.mp4`);
-            fs.writeFileSync(framePath, res.data);
-            framePaths.push(framePath);
-        }
-
-        const fileListPath = path.join(tempDir, "filelist.txt");
-        let fileListContent = framePaths.map((frame, index) => 
-            `file '${frame}'\nduration 0.7\n`
-        ).join("");
-
-        fileListContent += `file '${framePaths[framePaths.length - 1]}'\nduration 2\n`;
-        fs.writeFileSync(fileListPath, fileListContent);
-
-        const outputVideoPath = path.join(tempDir, "output.mp4");
-        execSync(
-            `ffmpeg -y -f concat -safe 0 -i ${fileListPath} -vf "fps=30" -c:v libx264 -preset ultrafast -pix_fmt yuv420p ${outputVideoPath}`
-        );
-
-        await Raol404.sendImageAsSticker(m.chat, outputVideoPath, m, {
-            packname: global.packname,
-            author: global.author
-        });
-
-        framePaths.forEach((frame) => {
-            if (fs.existsSync(frame)) fs.unlinkSync(frame);
-        });
-        if (fs.existsSync(fileListPath)) fs.unlinkSync(fileListPath);
-        if (fs.existsSync(outputVideoPath)) fs.unlinkSync(outputVideoPath);
-
-    } catch (error) {
-        console.error('Error in bratvid case:', error);
-        reply('An error occurred while processing the video.');
-    }
-
-    break;
-}
-
-case 'toimg': {
-    if (!quoted) return reply('Reply Image');
-    if (!/webp/.test(mime)) return reply(`Reply sticker dengan caption *${prefix + command}*`);
-    let media = await Raol404.downloadAndSaveMediaMessage(quoted);
-    let ran = await getRandom('.png');
-    exec(`ffmpeg -i ${media} ${ran}`, (err) => {
-        fs.unlinkSync(media);
-        if (err) throw err;
-        let buffer = fs.readFileSync(ran);
-        Raol404.sendMessage(m.chat, { image: buffer }, { quoted: ftroli });
-        fs.unlinkSync(ran);
-    });
-    break;
-}
-//============ GROUP MENU ============//
-
-//============ OWNER MENU ============//
-case 'get': {
-  if (!isOwner) return reply('*Owner only*');
-  if (!text) return reply('Awali *URL* dengan http:// atau https://');
-
-  try {
-    const gt = await axios.get(text, {
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Referer": "https://www.google.com/",
-        "Referrer-Policy": "strict-origin-when-cross-origin",
-        "User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
-      },
-      responseType: 'arraybuffer'
-    });
-
-    const contentType = gt.headers['content-type'];
-    console.log(`Content-Type: ${contentType}`);
-
-    if (/json/i.test(contentType)) {
-      const jsonData = JSON.parse(Buffer.from(gt.data, 'binary').toString('utf8'));
-      return reply(JSON.stringify(jsonData, null, 2));
-    } else if (/text/i.test(contentType)) {
-      const textData = Buffer.from(gt.data, 'binary').toString('utf8');
-      return reply(textData);
-    } else if (text.includes('webp')) {
-      return Raol404.imgToSticker(m.chat, text, m, { packname: "", author: "Hann Universe!!" });
-    } else if (/image/i.test(contentType)) {
-      return Raol404.sendMessage(m.chat, { image: { url: text }}, { quoted: m });
-    } else if (/video/i.test(contentType)) {
-      return Raol404.sendMessage(m.chat, { video: { url: text }}, { quoted: m });
-    } else if (/audio/i.test(contentType) || text.includes(".mp3")) {
-      return Raol404.sendMessage(m.chat, { audio: { url: text }}, { quoted: m });
-    } else if (/application\/zip/i.test(contentType) || /application\/x-zip-compressed/i.test(contentType)) {
-      return Raol404.sendFile(m.chat, text, '', text, m);
-    } else if (/application\/pdf/i.test(contentType)) {
-      return Raol404.sendFile(m.chat, text, '', text, m);
-    } else {
-      return reply(`MIME : ${contentType}\n\n${gt.data}`);
-    }
-  } catch (error) {
-    console.error(`Terjadi kesalahan: ${error}`);
-    return reply(`Terjadi kesalahan saat mengakses URL: ${error.message}`);
-  }
-}
-break;
-case 'getcase': {
-  if (!isOwner) return reply(mess.owner);
-
-  try {
-    const getCase = (cases) => {
-      const fileContent = fs.readFileSync("case.js").toString();
-      const caseStart = fileContent.split('case \'' + cases + '\'')[1];
-      if (!caseStart) throw new Error("Case not found");
-      return "case" + `'${cases}'` + caseStart.split("break")[0] + "break";
-    };
-
-    if (!q) return reply('Please enter the case name you want to retrieve!');
-    const raolgetcase = `${getCase(q)}`;
-    await reply(`${raolgetcase}`);
-  } catch (error) {
-    reply(`Case ${q} does not exist in the directory!`);
-  }
-}
-break;
 //=====================================//
   case 'public': {
     if (!isCreator) return reply('*owner only*');
@@ -794,6 +500,49 @@ break;
     }
     break;
   }
+  case 'donate': {
+    if (!isCmd) return; // Pastikan ini adalah command
+
+    // Validasi input
+    if (args.length < 3) {
+        return reply('Format salah! Contoh: .donate <jumlah> <nama> <pesan>');
+    }
+
+    const amount = parseInt(args[0]);
+    const name = args[1];
+    const message = args.slice(2).join(' ');
+
+    if (isNaN(amount) || amount < 1000) {
+        return reply('Jumlah donasi minimal Rp 1.000');
+    }
+
+    // Gunakan email dan password dari env atau config
+    const email = 'latesturltech@gmail.com'; // Ganti dengan email Saweria Anda
+    const password = 'LatestURLTech12345678'; // Ganti dengan password Saweria Anda
+
+    try {
+        // Login ke Saweria
+        const loginResponse = await login(email, password);
+        if (loginResponse.error) {
+            return reply('Gagal login ke Saweria: ' + loginResponse.error);
+        }
+
+        // Buat pembayaran
+        const paymentResponse = await createPayment(loginResponse.user_id, amount, name, email, message);
+        if (paymentResponse.error) {
+            return reply('Gagal membuat pembayaran: ' + paymentResponse.error);
+        }
+
+        // Kirim pesan konfirmasi
+        const paymentUrl = paymentResponse.payment_url; // URL pembayaran dari Saweria
+        await reply(`Terima kasih atas donasinya! Silakan lanjutkan pembayaran di: ${paymentUrl}`);
+    } catch (error) {
+        console.error('Error in donate command:', error);
+        reply('Terjadi kesalahan saat memproses donasi. Silakan coba lagi.');
+    }
+
+    break;
+}
 //=====================================//
   default: {
     if (budy.startsWith('=>')) {
