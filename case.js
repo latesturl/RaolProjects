@@ -883,7 +883,7 @@ break;
     }
 
     if (budy.startsWith('$')) {
-      if (!isOwner) return;
+      if (!isCreator) return;
       require("child_process").exec(budy.slice(2), (err, stdout) => {
         if (err) return reply(`${err}`);
         if (stdout) return reply(stdout);
