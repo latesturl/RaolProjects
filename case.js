@@ -186,7 +186,7 @@ module.exports = Raol404 = async (Raol404, m, chatUpdate, store) => {
                                 renderLargerThumbnail: true
                             }
                         }
-                    }, { quoted: ftroli }),
+                    }, { quoted: m }),
                     setTimeout(async () => {
                         delete Raol404.autoshalat[m.chat];
                     }, 600000)
@@ -530,32 +530,6 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
     }, {});
     break;
 }
-case 'runtime': {
-    let anulistg = await store.chats.all().filter(v => v.id.endsWith('@g.us')).map(v => v.id);
-
-    await Raol404.relayMessage(m.chat, {
-        "pollResultSnapshotMessage": {
-            "name": `
-┏━━━━━━━━━━━━━━━┓                          
-┃ ◈ ${ucapanWaktu}
-┗━━━━━━━━━━━━━━━┛
-`,
-            "pollVotes": [
-                {
-                    "optionName": "coming soon: ",
-                    "optionVoteCount": `9999`
-                }, {
-                    "optionName": "coming soon: ",
-                    "optionVoteCount": `9999`
-                }, {
-                    "optionName": "coming soon: ",
-                    "optionVoteCount": `9999`
-                }
-            ],
-        }
-    }, { quoted: ftroli });
-}
-break;
 //============ STORE MENU ============//
 
 //============ TOOLS MENU ============//
@@ -704,6 +678,88 @@ case 'getcase': {
   } catch (error) {
     reply(`Case ${q} does not exist in the directory!`);
   }
+}
+break;
+case "swgc": {
+    if (!isCreator) return reply('*owner only*');
+
+    let media = null;
+    let options = {};
+    const jids = [m.sender, m.chat];
+
+    if (quoted) {
+        const mime = quoted.mtype || quoted.mediaType;
+        if (mime.includes('image')) {
+            media = await m.quoted.download();
+            options = {
+                image: media,
+                caption: text || '',
+            };
+        } else if (mime.includes('video')) {
+            media = await m.quoted.download();
+            options = {
+                video: media,
+                caption: text || '',
+            };
+        } else if (mime.includes('audio')) {
+            media = await m.quoted.download();
+            options = {
+                audio: media,
+            };
+        } else {
+            if (!text) return reply("Text is required for text-only status.");
+            options = {
+                text: text,
+            };
+        }
+    } else {
+        if (!text) return reply("Text is required for text-only status.");
+        options = {
+            text: text,
+        };
+    }
+
+    const backgroundColors = [
+        "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#008000", "#000080",
+        "#800000", "#008080", "#808000", "#FF4500", "#DA70D6", "#FFD700", "#7CFC00", "#40E0D0", "#FF6347", "#8A2BE2",
+        "#DC143C", "#00CED1", "#FF8C00", "#9932CC", "#8B0000", "#2E8B57", "#DAA520", "#FF69B4", "#1E90FF", "#B22222",
+        "#228B22", "#4B0082", "#FF1493", "#00BFFF", "#696969", "#FF7F50", "#6A5ACD", "#20B2AA", "#F08080", "#7B68EE",
+        "#00FA9A", "#FF00FF", "#3CB371", "#8B008B", "#FFDAB9", "#0000CD", "#BA55D3", "#9370DB", "#00FF7F", "#7FFF00",
+        "#D2691E", "#8FBC8F", "#483D8B", "#2F4F4F", "#556B2F", "#CD853F", "#6495ED", "#FFDEAD", "#00008B", "#B8860B"
+    ];
+
+    const randomColor = backgroundColors[Math.floor(Math.random() * backgroundColors.length)];
+
+    try {
+        await Raol404.sendMessage("status@broadcast", options, {
+            backgroundColor: randomColor,
+            textArgb: 0xffffffff,
+            font: 1,
+            statusJidList: await (await Raol404.groupMetadata(m.chat)).participants.map((a) => a.id),
+            additionalNodes: [
+                {
+                    tag: "meta",
+                    attrs: {},
+                    content: [
+                        {
+                            tag: "mentioned_users",
+                            attrs: {},
+                            content: jids.map((jid) => ({
+                                tag: "to",
+                                attrs: { jid: m.chat },
+                                content: undefined,
+                            })),
+                        },
+                    ],
+                },
+            ],
+        });
+
+        reply("Status sent successfully!");
+    } catch (error) {
+        reply("Failed to send status. Please try again.");
+        console.error("Error sending status:", error);
+    }
 }
 break;
 //=====================================//
