@@ -140,64 +140,11 @@ module.exports = Raol404 = async (Raol404, m, chatUpdate, store) => {
         const isAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false;
         const groupOwner = m.isGroup && groupMetadata ? groupMetadata.owner : '';
         const isGroupOwner = m.isGroup ? (groupOwner ? groupOwner : groupAdmins).includes(m.sender) : false;
-        
-        // AUTO SHOLAT
-        Raol404.autoshalat = Raol404.autoshalat ? Raol404.autoshalat : {};
-        let id = m.chat;
-
-        if (id in Raol404.autoshalat) {
-            return false;
-        }
-
-        let jadwalSholat = {
-            shubuh: '04:39',
-            dzuhur: '12:06',
-            ashar: '15:15',
-            magrib: '18:14',
-            isya: '19:25',
-        };
-
-        const prayertime = new Date((new Date).toLocaleString("en-US", {
-            timeZone: "Asia/Jakarta"
-        }));
-
-        const hours = prayertime.getHours();
-        const minutes = prayertime.getMinutes();
-        const timeNow = `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-
-        for (let [sholat, waktu] of Object.entries(jadwalSholat)) {
-            if (timeNow === waktu) {
-                Raol404.autoshalat[id] = [
-                    Raol404.sendMessage(m.chat, {
-                        audio: {
-                            url: 'https://files.catbox.moe/0nj6pp.mp3'
-                        },
-                        mimetype: 'audio/mp4',
-                        ptt: true,
-                        contextInfo: {
-                            externalAdReply: {
-                                showAdAttribution: true,
-                                mediaType: 1,
-                                mediaUrl: '',
-                                title: `Selamat menunaikan Ibadah Sholat ${sholat}`,
-                                body: `🕑 ${waktu}`,
-                                sourceUrl: '',
-                                thumbnailUrl: 'https://github.com/latesturl/dbRaolProjects/raw/refs/heads/main/media/menu.jpg',
-                                renderLargerThumbnail: true
-                            }
-                        }
-                    }, { quoted: m }),
-                    setTimeout(async () => {
-                        delete Raol404.autoshalat[m.chat];
-                    }, 600000)
-                ];
-            }
-        }
 
         // ACCESS
 
         // REACT
-        const moji = ['📚', '💭', '💫', '🌌', '🌏', '✨', '🌷', '🍁', '🪻'];
+        const moji = ['📚', '💭', '💫', '🌌', '🌏', '〽️', '🌷', '🍁', '🪻'];
         const randomemoji = moji[Math.floor(Math.random() * moji.length)];
 
         // TIME
@@ -464,6 +411,7 @@ case "menu": case "help": {
     }, { quoted: ftroli });
 }
 break;
+//=====================================//
 case 'ping': {
     const used = process.memoryUsage();
     const cpus = os.cpus().map(cpu => {
@@ -530,92 +478,7 @@ ${cpus.map((cpu, i) => `${i + 1}. ${cpu.model.trim()} (${cpu.speed} MHZ)\n${Obje
     }, {});
     break;
 }
-//============ STORE MENU ============//
-
-//============ TOOLS MENU ============//
-case 'brat': {
-    if (!text) return reply('Please provide the text as well');
-    const apiUrl = `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(text)}`;
-    await Raol404.sendImageAsSticker(m.chat, apiUrl, m, {
-        packname: global.packname,
-        author: global.author
-    });
-    break;
-}
-
-case 'bratvid': {
-    const { execSync } = require('child_process');
-    const tempDir = path.join(process.cwd(), 'temporary/');
-    const framePaths = [];
-
-    if (!text) return reply(`Example: ${prefix + command} hello i am RaolProjects`);
-    if (text.length > 40) return reply(`Character limit exceeded, max 40 characters!`);
-
-    if (!fs.existsSync(tempDir)) fs.mkdirSync(tempDir);
-
-    try {
-        const words = text.split(" ");
-        for (let i = 0; i < words.length; i++) {
-            const currentText = words.slice(0, i + 1).join(" ");
-            const res = await axios.get(
-                `https://brat.caliphdev.com/api/brat?text=${encodeURIComponent(currentText)}`,
-                { responseType: "arraybuffer" }
-            ).catch((e) => e.response);
-
-            const framePath = path.join(tempDir, `frame${i}.mp4`);
-            fs.writeFileSync(framePath, res.data);
-            framePaths.push(framePath);
-        }
-
-        const fileListPath = path.join(tempDir, "filelist.txt");
-        let fileListContent = framePaths.map((frame, index) => 
-            `file '${frame}'\nduration 0.7\n`
-        ).join("");
-
-        fileListContent += `file '${framePaths[framePaths.length - 1]}'\nduration 2\n`;
-        fs.writeFileSync(fileListPath, fileListContent);
-
-        const outputVideoPath = path.join(tempDir, "output.mp4");
-        execSync(
-            `ffmpeg -y -f concat -safe 0 -i ${fileListPath} -vf "fps=30" -c:v libx264 -preset ultrafast -pix_fmt yuv420p ${outputVideoPath}`
-        );
-
-        await Raol404.sendImageAsSticker(m.chat, outputVideoPath, m, {
-            packname: global.packname,
-            author: global.author
-        });
-
-        framePaths.forEach((frame) => {
-            if (fs.existsSync(frame)) fs.unlinkSync(frame);
-        });
-        if (fs.existsSync(fileListPath)) fs.unlinkSync(fileListPath);
-        if (fs.existsSync(outputVideoPath)) fs.unlinkSync(outputVideoPath);
-
-    } catch (error) {
-        console.error('Error in bratvid case:', error);
-        reply('An error occurred while processing the video.');
-    }
-
-    break;
-}
-
-case 'toimg': {
-    if (!quoted) return reply('Reply Image');
-    if (!/webp/.test(mime)) return reply(`Reply sticker dengan caption *${prefix + command}*`);
-    let media = await Raol404.downloadAndSaveMediaMessage(quoted);
-    let ran = await getRandom('.png');
-    exec(`ffmpeg -i ${media} ${ran}`, (err) => {
-        fs.unlinkSync(media);
-        if (err) throw err;
-        let buffer = fs.readFileSync(ran);
-        Raol404.sendMessage(m.chat, { image: buffer }, { quoted: ftroli });
-        fs.unlinkSync(ran);
-    });
-    break;
-}
-//============ GROUP MENU ============//
-
-//============ OWNER MENU ============//
+//============= OWNER MENU =============//
 case 'get': {
   if (!isOwner) return reply('*Owner only*');
   if (!text) return reply('Awali *URL* dengan http:// atau https://');
